@@ -4,15 +4,28 @@ import curses
 import threading
 import time
 
+queue = []
+
+def add_text(win, text):
+    try:
+        queue.append(text)
+        win.addstr(text + "\n")
+        win.refresh()
+    except:
+        queue.pop(0)
+        win.clear()
+        for t in queue:
+            win.addstr(t + "\n")
+            win.refresh()
+
 def listen_messages(chat_win, lock):
     messages = ["Hello!", "How are you?", "This is a test."]
     i = 0
     while True:
-        time.sleep(5)
         with lock:
-            chat_win.addstr(f"Friend: {messages[i % len(messages)]}\n")
-            chat_win.refresh()
+            add_text(chat_win, f"Friend: {messages[i % len(messages)]}")
         i += 1
+        time.sleep(7)
 
 def main(stdscr):
     curses.curs_set(1)
@@ -36,8 +49,7 @@ def main(stdscr):
         # ENTER key pressed
         if ch == 10:
             with lock:
-                chat_win.addstr(f"You: {typed}\n")
-                chat_win.refresh()
+                add_text(chat_win, f"You: {typed}")
             typed = ""
             input_win.clear()
             input_win.addstr("You: ")
