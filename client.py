@@ -1,4 +1,5 @@
 import socket
+from encryption import hash_password
 
 class Guest:
     
@@ -13,5 +14,6 @@ class Guest:
         self.room_ip = room_ip
         self.port = port
 
-    def auth(self, password):
-        pass
+    def auth(self, password: str):
+        hash, salt = hash_password(password)
+        self.socket.send(("auth:" + hash + ":" + salt).encode())

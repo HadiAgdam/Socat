@@ -16,7 +16,8 @@ if __name__ == "__main__":
         while True:
             port = int(input("Enter the port: "))
             try:
-                room.create(port)
+                ip = room.create(port)
+                print("created room at:", ip)
             except Exception as ex:
                 print("Feild to create room:", ex)
             
@@ -59,5 +60,7 @@ if __name__ == "__main__":
                 print("Authenticated successfully!")
                 break
             print("Auth failed!")
+    
+        # successfully joined the room
 
         
