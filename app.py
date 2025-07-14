@@ -1,6 +1,7 @@
-from network.server import Room
-from network.client import Guest
+from server import Room
+from client import Guest
 from time import sleep
+from display import Display
 
 # room -> server
 # guest -> client
@@ -28,8 +29,10 @@ if __name__ == "__main__":
             print("Retrying....")
             sleep(2)
         
+        d = Display(room.send_message)
+        d.run()
 
-        # successfully created a room
+        room.message_callback = d.new_message
 
         
 
@@ -60,7 +63,12 @@ if __name__ == "__main__":
                 print("Authenticated successfully!")
                 break
             print("Auth failed!")
+        
+
+        d = Display(guest.send_message)
+        d.run()
+
+        guest.message_callback = d.new_message
     
-        # successfully joined the room
 
         
