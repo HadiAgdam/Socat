@@ -2,6 +2,7 @@ import socket
 from threading import Thread
 from time import sleep
 from encryption import hash_password
+from utils import GuestModel
 
 
 def get_local_ip():
@@ -17,9 +18,10 @@ def get_local_ip():
 class Room:
 
     def __listen_for_authenticated_quest(self, c, addr):
+        guest = GuestModel(c, addr)
         while True:
             try:
-                data = c.recv(1024)
+                data = guest.c.recv(1024)
                 if not data:
                     continue
                 data = data.decode()
@@ -28,31 +30,32 @@ class Room:
                     continue
                 if self.message_callback:
                     self.message_callback(data)
-                for guest in self.authenticated_guests:
-                    if addr != guest[1]:
+                for g in self.authenticated_guests:
+                    if g != guest:
                         self.send_message(data)
             except Exception as ex:
                 raise ex
             
 
     def __listen_for_not_authenticated_quest(self, c, addr):
+        guest = GuestModel(c, addr)
         while True:
-            data = c.recv(1024)
+            data = guest.c.recv(1024)
             if not data:
                 continue
             data = data.decode()
             if data.startswith("auth:"):
                 _, hash, salt = data.split(":")
                 if hash_password(self.password, salt)[0] == hash:
-                    self.authenticated_guests.append((c, addr))
-                    self.not_authenticated_quests.remove((c, addr))
+                    self.authenticated_guests.append(guest)
+                    self.not_authenticated_guests.remove(guest)
                     Thread(target=self.__listen_for_authenticated_quest, args=(c, addr)).start()
                     return
 
     def listen_for_connections(self):
         while True:
             c, addr = self.socket.accept()
-            self.not_authenticated_quests.append((c, addr))
+            self.not_authenticated_guests.append(GuestModel(c, addr))
             Thread(target=self.__listen_for_not_authenticated_quest, args=(c, addr)).start()
 
     
@@ -60,7 +63,7 @@ class Room:
         self.guests = []
         self.password = password
         self.is_up = False
-        self.not_authenticated_quests = []
+        self.not_authenticated_guests = []
         self.authenticated_guests = []
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.message_callback = None
@@ -75,4 +78,4 @@ class Room:
     
     def send_message(self, text: str):
         for guest in self.authenticated_guests:
-            guest[0].send(text.encode())
+            guest.c.send(text.encode())
