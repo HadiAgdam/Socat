@@ -29,10 +29,11 @@ if __name__ == "__main__":
             print("Retrying....")
             sleep(2)
         
-        d = Display(room.send_message)
+        d = Display(room.send_server_message)
+        room.message_callback = d.new_message
+
         d.run()
 
-        room.message_callback = d.new_message
 
         
 
@@ -46,16 +47,25 @@ if __name__ == "__main__":
 
             print("Connecting...")
             try:
-                guest.connect(ip, port)
+                guest.connect(ip, int(port))
             except Exception as ex:
                 print("Failed to connect:", ex)
+                raise ex
                 continue
             if guest.connected:
                 print("Connected successfully!")
                 break
         
+        authed = False
 
-        while True:
+        def password_callback(txt):
+            global authed
+            print("password callback: ", txt)
+            authed = txt == "Auth successful"
+
+        guest.message_callback = password_callback
+
+        while not authed:
             password = input("Enter the password of the room: ")
 
             guest.auth(password)
@@ -63,12 +73,14 @@ if __name__ == "__main__":
                 print("Authenticated successfully!")
                 break
             print("Auth failed!")
+            sleep(1)
         
 
         d = Display(guest.send_message)
+        guest.message_callback = d.new_message
+
         d.run()
 
-        guest.message_callback = d.new_message
     
 
         

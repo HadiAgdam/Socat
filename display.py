@@ -1,4 +1,5 @@
 from curses import newwin, KEY_BACKSPACE, wrapper, curs_set
+from utils import encode, decode
 
 
 class Display:
@@ -9,7 +10,15 @@ class Display:
         self.on_send_message = on_send_message
 
     def new_message(self, text: str):
-        self.__add_text(text)
+        time, role, username, text = text.split(":")
+
+        time = decode(time)
+        role = decode(role)
+        username = decode(username)
+        text = decode(text)
+
+        # [2025/6/15 4:58pm] <guest> user1 ▶ Hello This is some fucking text
+        self.__add_text(f"[{time}] <{role}> {username} ▶ {text}")
 
     def __add_text(self, text):
         try:
@@ -44,7 +53,6 @@ class Display:
             # ENTER key pressed
             if ch == 10:
                 self.on_send_message(typed)
-                self.__add_text(f"You: {typed}")
                 typed = ""
                 self.input_win.clear()
                 self.input_win.addstr("You: ")

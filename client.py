@@ -15,7 +15,8 @@ class Guest:
                 if self.message_callback:
                     self.message_callback(data)
             except Exception as ex:
-                log("error :" + str(ex))
+                raise ex
+                log("error :", str(ex))
     
     def __init__(self):
         self.connected = False
@@ -29,6 +30,7 @@ class Guest:
         self.room_ip = room_ip
         self.port = port
         Thread(target=self.__listen_for_incoming_message).start()
+        self.connected = True
 
     def auth(self, password: str):
         hash, salt = hash_password(password)

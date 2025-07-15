@@ -2,7 +2,10 @@ import socket
 from threading import Thread
 from time import sleep
 from encryption import hash_password
-from utils import GuestModel
+from utils import GuestModel, pre_generated_usernames, encode, decode
+from random import choice
+from string import ascii_lowercase
+from datetime import datetime
 
 
 def get_local_ip():
@@ -17,8 +20,7 @@ def get_local_ip():
 
 class Room:
 
-    def __listen_for_authenticated_quest(self, c, addr):
-        guest = GuestModel(c, addr)
+    def __listen_for_authenticated_quest(self, guest: GuestModel):
         while True:
             try:
                 data = guest.c.recv(1024)
@@ -28,11 +30,9 @@ class Room:
                 if data.startswith("/"):
                     # TODO
                     continue
-                if self.message_callback:
-                    self.message_callback(data)
-                for g in self.authenticated_guests:
-                    if g != guest:
-                        self.send_message(data)
+                # TODO encode
+
+                self.__send_message_to_all("guest", guest.username, data)
             except Exception as ex:
                 raise ex
             
@@ -47,10 +47,28 @@ class Room:
             if data.startswith("auth:"):
                 _, hash, salt = data.split(":")
                 if hash_password(self.password, salt)[0] == hash:
+
+                    while not False:
+                        username = choice(pre_generated_usernames)
+                        duplicate_count = 0
+                        for guest in self.authenticated_guests:
+                            if guest.username == username:
+                                duplicate_count += 1
+                                break
+                        if duplicate_count == 0:
+                            break
+
+                        # It is going to freeze inside loop if all of pregenerated usernames are taken
+                        # So I just generate a random string :)
+                        if duplicate_count == len(pre_generated_usernames):
+                            username = ''.join(choice(ascii_lowercase) for _ in range(6))
+                    guest.username = username
+
                     self.authenticated_guests.append(guest)
                     self.not_authenticated_guests.remove(guest)
-                    Thread(target=self.__listen_for_authenticated_quest, args=(c, addr)).start()
-                    return
+                    Thread(target=self.__listen_for_authenticated_quest, args=[guest]).start()
+                    guest.c.send("Auth successful".encode())
+                    
 
     def listen_for_connections(self):
         while True:
@@ -67,6 +85,7 @@ class Room:
         self.authenticated_guests = []
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.message_callback = None
+        self.__admin_username = "Admin"
     
     def create(self, port) -> str: # returns the ip of the host on network
         self.socket.bind(('', port))
@@ -76,6 +95,22 @@ class Room:
         self.thread.start()
         return get_local_ip()
     
-    def send_message(self, text: str):
+    def __send_message_to_all(self, role: str, username: str, text: str):
+        role = encode(role)
+        username = encode(username)
+        text = encode(text)
+        text = f"{encode(datetime.now().strftime("%I:%M:%S"))}:{role}:{username}:{text}"
         for guest in self.authenticated_guests:
             guest.c.send(text.encode())
+        if self.message_callback:
+            self.message_callback(text)
+    
+    def send_server_message(self, text: str):
+        # also check for commands
+        if text.startswith("/"):
+            command = text.split(":")
+            match(command[0]):
+                case "/set_name":
+                    self.__admin_username = command[1]
+        else:
+            self.__send_message_to_all("Host", self.__admin_username, text)

@@ -1,13 +1,4 @@
-
-def t():
-    print("t")
+from utils import encode, decode
 
 
-a: callable = None
-
-if not a:
-    print("not a")
-
-a = t
-
-a()
+print(decode(encode("text")))

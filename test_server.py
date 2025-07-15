@@ -9,7 +9,7 @@ r.create(8980)
 print("created")
 
 
-d = Display(r.send_message)
+d = Display(r.send_message_to_all)
 r.message_callback = d.new_message
 
 d.run()
