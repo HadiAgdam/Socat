@@ -33,9 +33,7 @@ if __name__ == "__main__":
         room.message_callback = d.new_message
 
         d.run()
-
-
-        
+  
 
     elif choice == "2":
 
@@ -61,7 +59,10 @@ if __name__ == "__main__":
         def password_callback(txt):
             global authed
             print("password callback: ", txt)
-            authed = txt == "Auth successful"
+            if txt == "Auth successful":
+                authed = True
+            else:
+                print("Auth failed: " + txt)
 
         guest.message_callback = password_callback
 
@@ -72,7 +73,6 @@ if __name__ == "__main__":
             if guest.authenticated:
                 print("Authenticated successfully!")
                 break
-            print("Auth failed!")
             sleep(1)
         
 
