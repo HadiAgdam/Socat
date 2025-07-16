@@ -1,15 +1,17 @@
 from server import Room
 from display import Display
 
+port = 8989
 
-r = Room("123")
+if __name__ == "__main__":
+    r = Room("123")
 
-r.create(8980)
+    r.create(port)
 
-print("created")
+    print("created")
 
 
-d = Display(r.send_message_to_all)
-r.message_callback = d.new_message
+    d = Display(r.send_server_message)
+    r.message_callback = d.new_message
 
-d.run()
+    d.run()

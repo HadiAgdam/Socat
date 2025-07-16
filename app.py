@@ -54,25 +54,14 @@ if __name__ == "__main__":
                 print("Connected successfully!")
                 break
         
-        authed = False
 
-        def password_callback(txt):
-            global authed
-            if txt == "Auth successful":
-                authed = True
-            else:
-                print("Auth failed: " + txt)
-
-        guest.message_callback = password_callback
-
-        while not authed:
-            password = input("Enter the password of the room: ")
+        while not guest.authenticated:
+            password = input("Enter password of the room: ")
 
             guest.auth(password)
-            if guest.authenticated:
-                print("Authenticated successfully!")
-                break
             sleep(1)
+            if not guest.authenticated:
+                print("Auth failed!")
         
 
         d = Display(guest.send_message)
