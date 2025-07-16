@@ -12,6 +12,10 @@ class Guest:
                 if not data:
                     continue
                 data = data.decode()
+                if data == "Auth successful":
+                    self.authenticated = True
+                    # return   this was the fucking bug I was looking for since last night
+                    continue
                 if self.message_callback:
                     self.message_callback(data)
             except Exception as ex:

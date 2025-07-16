@@ -20,7 +20,7 @@ if __name__ == "__main__":
                 ip = room.create(port)
                 print("created room at:", ip)
             except Exception as ex:
-                print("Feild to create room:", ex)
+                print("Faild to create room:", ex)
             
             if room.is_up:
                 print("Created room successfully!")
@@ -58,7 +58,6 @@ if __name__ == "__main__":
 
         def password_callback(txt):
             global authed
-            print("password callback: ", txt)
             if txt == "Auth successful":
                 authed = True
             else:
