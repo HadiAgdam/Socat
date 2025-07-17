@@ -13,13 +13,14 @@ def log(text: str):
 
 class GuestModel:
     
-    def __init__(self, c: socket, addr, username=None):
+    def __init__(self, c: socket, id: str, addr, username: str=None,):
         self.c = c
-        self.addr = addr
         self.username = username
+        self.addr = addr
+        self.id = id
 
     def __eq__(self, other):
-        return self.addr == other.addr if isinstance(other, GuestModel) else False
+        return self.id == other.id if isinstance(other, GuestModel) else False
 
 
 pre_generated_usernames = [

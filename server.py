@@ -23,6 +23,8 @@ class Room:
     def message_callback(txt):  # default callback
         pass
 
+    def __get_guest_id(self, socket, addr):
+        return str(addr[1])
 
     def __on_guest_disconnect(self, guest: GuestModel):
         self.authenticated_guests.remove(guest)
@@ -42,7 +44,7 @@ class Room:
                     # TODO
                     continue
                 log("received in server data: " + data)
-                self.__send_message_to_all("guest", guest.username, data)
+                self.__send_message_to_all("guest", guest.username, guest.id, data)
             except ConnectionResetError:
                 self.__on_guest_disconnect(guest)
                 return
@@ -52,7 +54,7 @@ class Room:
             
 
     def __listen_for_not_authenticated_quest(self, c, addr):
-        guest = GuestModel(c, addr)
+        guest = GuestModel(c, self.__get_guest_id(c, addr), addr)
         while True:
             data = guest.c.recv(1024)
             if not data:
@@ -80,7 +82,7 @@ class Room:
                     guest.username = username
 
                     self.authenticated_guests.append(guest)
-                    self.not_authenticated_guests.remove(guest)
+                    self.not_authenticated_guests.remove((c, addr))
                     Thread(target=self.__listen_for_authenticated_quest, args=[guest]).start()
                     guest.c.send("Auth successful".encode())
                     self.__log_to_all(f"{guest.username} joined to the room.")
@@ -90,7 +92,7 @@ class Room:
     def listen_for_connections(self):
         while True:
             c, addr = self.socket.accept()
-            self.not_authenticated_guests.append(GuestModel(c, addr))
+            self.not_authenticated_guests.append((c ,addr))
             Thread(target=self.__listen_for_not_authenticated_quest, args=(c, addr)).start()
 
     
@@ -111,11 +113,12 @@ class Room:
         self.thread.start()
         return get_local_ip()
     
-    def __send_message_to_all(self, role: str, username: str, text: str):
+    def __send_message_to_all(self, role: str, username: str, id: str, text: str):
         role = encode(role)
         username = encode(username)
         text = encode(text)
-        text = f"public_message:{role}:{username}:{text}"
+        id = encode(id)
+        text = f"public_message:{role}:{username}:{id}:{text}"
         for guest in self.authenticated_guests:
             guest.c.send(text.encode())
         
@@ -136,4 +139,4 @@ class Room:
                 case "/set_name":
                     self.__admin_username = command[1]
         else:
-            self.__send_message_to_all("Host", self.__admin_username, text)
+            self.__send_message_to_all("Host", self.__admin_username, "127.0.0.1", text)

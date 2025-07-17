@@ -18,14 +18,15 @@ class Display:
         text = text[len(command) + 1:]
         match (command):
             case "public_message":
-                role, username, text = text.split(":")
+                role, username, id, text = text.split(":")
 
                 role = decode(role)
                 username = decode(username)
+                id = decode(id)
                 text = decode(text)
 
-                # [2025/6/15 4:58pm] <guest> user1 ▶ Hello This is some fucking text
-                self.__add_text(f"[{self.__get_current_time()}] <{role}> {username} ▶ {text}")
+                # [2025/6/15 4:58pm] (127.0.0.1) <guest> user1 ▶ Hello This is some fucking text
+                self.__add_text(f"[{self.__get_current_time()}] ({id}) <{role}> {username} ▶ {text}")
 
             case "log":
                 self.__add_text(f"[{self.__get_current_time()}] ROOM ▶ {decode(text)}")
