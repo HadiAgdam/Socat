@@ -20,19 +20,29 @@ def get_local_ip():
 
 class Room:
 
+
+    def __on_guest_disconnect(self, guest: GuestModel):
+        self.authenticated_guests.remove(guest)
+        guest.c.close()
+        self.__send_message_to_all("guest", guest.username, "DISCONNECTED") # but maybe send a message as Room
+
     def __listen_for_authenticated_quest(self, guest: GuestModel):
         while True:
             try:
                 data = guest.c.recv(1024)
                 log("recv")
                 if not data:
-                    continue
+                    self.__on_guest_disconnect(guest)
+                    return
                 data = data.decode()
                 if data.startswith("/"):
                     # TODO
                     continue
                 log("received in server data: " + data)
                 self.__send_message_to_all("guest", guest.username, data)
+            except ConnectionResetError:
+                self.__on_guest_disconnect(guest)
+                return
             except Exception as ex:
                 log("server received message error :" + str(ex))
                 raise ex
@@ -63,6 +73,7 @@ class Room:
                         # So I just generate a random string :)
                         if duplicate_count == len(pre_generated_usernames):
                             username = ''.join(choice(ascii_lowercase) for _ in range(6))
+                            break
                     guest.username = username
 
                     self.authenticated_guests.append(guest)

@@ -1,4 +1,5 @@
 from base64 import b64encode, b64decode
+from socket import socket
 
 class ConnectionError:
     pass
@@ -12,7 +13,7 @@ def log(text: str):
 
 class GuestModel:
     
-    def __init__(self, c, addr, username=None):
+    def __init__(self, c: socket, addr, username=None):
         self.c = c
         self.addr = addr
         self.username = username
