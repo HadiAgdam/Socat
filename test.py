@@ -1,4 +1,4 @@
-from utils import encode, decode
+from utils import log
 
 
-print(decode(encode("text")))
+log("text2")

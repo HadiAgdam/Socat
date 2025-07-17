@@ -69,6 +69,7 @@ class Room:
                     self.not_authenticated_guests.remove(guest)
                     Thread(target=self.__listen_for_authenticated_quest, args=[guest]).start()
                     guest.c.send("Auth successful".encode())
+                    return
                     
 
     def listen_for_connections(self):
