@@ -20,11 +20,14 @@ def get_local_ip():
 
 class Room:
 
+    def message_callback(txt):  # default callback
+        pass
+
 
     def __on_guest_disconnect(self, guest: GuestModel):
         self.authenticated_guests.remove(guest)
         guest.c.close()
-        self.__send_message_to_all("guest", guest.username, "DISCONNECTED") # but maybe send a message as Room
+        self.__log_to_all(f"{guest.username} disconnected!")
 
     def __listen_for_authenticated_quest(self, guest: GuestModel):
         while True:
@@ -80,6 +83,7 @@ class Room:
                     self.not_authenticated_guests.remove(guest)
                     Thread(target=self.__listen_for_authenticated_quest, args=[guest]).start()
                     guest.c.send("Auth successful".encode())
+                    self.__log_to_all(f"{guest.username} joined to the room.")
                     return
                     
 
@@ -97,7 +101,6 @@ class Room:
         self.not_authenticated_guests = []
         self.authenticated_guests = []
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.message_callback = None
         self.__admin_username = "Admin"
     
     def create(self, port) -> str: # returns the ip of the host on network
@@ -112,11 +115,18 @@ class Room:
         role = encode(role)
         username = encode(username)
         text = encode(text)
-        text = f"{encode(datetime.now().strftime("%I:%M:%S"))}:{role}:{username}:{text}"
+        text = f"public_message:{role}:{username}:{text}"
         for guest in self.authenticated_guests:
             guest.c.send(text.encode())
-        if self.message_callback:
-            self.message_callback(text)
+        
+        self.message_callback(text)
+    
+    def __log_to_all(self, text: str):
+        text = f"log:{encode(text)}"
+        for guest in self.authenticated_guests:
+            guest.c.send(text.encode())
+
+        self.message_callback(text)
     
     def send_server_message(self, text: str):
         # also check for commands

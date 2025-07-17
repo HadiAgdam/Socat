@@ -1,24 +1,35 @@
 from curses import newwin, KEY_BACKSPACE, wrapper, curs_set
 from utils import encode, decode
+from datetime import datetime
 
 
 class Display:
 
     queue = []
 
+    def __get_current_time(self) -> str:
+        return datetime.now().strftime("%I:%M:%S")
+
     def __init__(self, on_send_message):
         self.on_send_message = on_send_message
 
-    def new_message(self, text: str):
-        time, role, username, text = text.split(":")
+    def new_incoming_message(self, text: str):
+        command = text.split(":")[0]
+        text = text[len(command) + 1:]
+        match (command):
+            case "public_message":
+                role, username, text = text.split(":")
 
-        time = decode(time)
-        role = decode(role)
-        username = decode(username)
-        text = decode(text)
+                role = decode(role)
+                username = decode(username)
+                text = decode(text)
 
-        # [2025/6/15 4:58pm] <guest> user1 ▶ Hello This is some fucking text
-        self.__add_text(f"[{time}] <{role}> {username} ▶ {text}")
+                # [2025/6/15 4:58pm] <guest> user1 ▶ Hello This is some fucking text
+                self.__add_text(f"[{self.__get_current_time()}] <{role}> {username} ▶ {text}")
+
+            case "log":
+                self.__add_text(f"[{self.__get_current_time()}] ROOM ▶ {decode(text)}")
+
 
     def __add_text(self, text):
         try:

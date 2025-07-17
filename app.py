@@ -30,7 +30,7 @@ if __name__ == "__main__":
             sleep(2)
         
         d = Display(room.send_server_message)
-        room.message_callback = d.new_message
+        room.message_callback = d.new_incoming_message
 
         d.run()
   
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         
 
         d = Display(guest.send_message)
-        guest.message_callback = d.new_message
+        guest.message_callback = d.new_incoming_message
 
         d.run()
 

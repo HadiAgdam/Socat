@@ -21,7 +21,7 @@ def typed_new_message(text):
     print("typed new message in client: ", text)
 
 d = Display(typed_new_message)
-g.message_callback = d.new_message
+g.message_callback = d.new_incoming_message
 
 
 

@@ -1,4 +1,9 @@
-from utils import log
+def a():
+    print("a")
 
+def b():
+    print("b")
 
-log("text2")
+a = b
+
+a()
