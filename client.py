@@ -20,12 +20,11 @@ class Guest:
                     self.message_callback(data)
             except Exception as ex:
                 raise ex
-                log("error :", str(ex))
     
     def __init__(self):
         self.connected = False
         self.authenticated = False
-        self.socket = socket.socket()
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.message_callback = None
     
 

@@ -3,8 +3,11 @@ from base64 import b64encode, b64decode
 class ConnectionError:
     pass
 
-def log(*values: str):
-    print(values)
+def log(text: str):
+    f = open("log.txt", '+a')
+    f.writelines(text + "\n")
+    f.close()
+
 
 
 class GuestModel:

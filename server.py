@@ -2,7 +2,7 @@ import socket
 from threading import Thread
 from time import sleep
 from encryption import hash_password
-from utils import GuestModel, pre_generated_usernames, encode, decode
+from utils import GuestModel, pre_generated_usernames, encode, decode, log
 from random import choice
 from string import ascii_lowercase
 from datetime import datetime
@@ -24,16 +24,17 @@ class Room:
         while True:
             try:
                 data = guest.c.recv(1024)
+                log("recv")
                 if not data:
                     continue
                 data = data.decode()
                 if data.startswith("/"):
                     # TODO
                     continue
-                # TODO encode
-
+                log("received in server data: " + data)
                 self.__send_message_to_all("guest", guest.username, data)
             except Exception as ex:
+                log("server received message error :" + str(ex))
                 raise ex
             
 

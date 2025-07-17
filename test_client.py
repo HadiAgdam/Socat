@@ -2,6 +2,7 @@ from client import Guest
 from display import Display
 from time import sleep
 from test_server import port
+from utils import log
 
 g = Guest()
 
@@ -15,10 +16,11 @@ while not g.authenticated:
     pass
 
 def typed_new_message(text):
-    print("typed_new_message:", text)
+    log("typed new message in client: " + text)
     g.send_message(text)
+    print("typed new message in client: ", text)
 
-d = Display(g.send_message)
+d = Display(typed_new_message)
 g.message_callback = d.new_message
 
 
