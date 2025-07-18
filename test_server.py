@@ -1,7 +1,7 @@
 from server import Room
 from display import Display
 
-port = 8582
+port = 8584
 
 if __name__ == "__main__":
     r = Room("123")

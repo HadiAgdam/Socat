@@ -2,6 +2,7 @@ import socket
 from encryption import hash_password
 from utils import log
 from threading import Thread
+from utils import encode, decode
 
 class Guest:
 
@@ -40,4 +41,11 @@ class Guest:
         self.socket.send(("auth:" + hash + ":" + salt).encode())
     
     def send_message(self, text: str):
-        self.socket.send(text.encode())
+        if text.startswith("/"):
+            command = text.split(" ")[0]
+            text = text[len(command):]
+            match (command):
+                case "/set_name":
+                    self.socket.send(("set_name:" + encode(text)).encode())
+        else:
+            self.socket.send(("public_message:" + encode(text)).encode())

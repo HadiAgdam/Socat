@@ -40,11 +40,23 @@ class Room:
                     self.__on_guest_disconnect(guest)
                     return
                 data = data.decode()
-                if data.startswith("/"):
-                    # TODO
-                    continue
-                log("received in server data: " + data)
-                self.__send_message_to_all("guest", guest.username, guest.id, data)
+                
+                command = data.split(":")[0]
+                data = data[len(command) + 1:]
+                match(command):
+                    case "public_message":
+                        self.__send_message_to_all("guest", guest.username, guest.id, decode(data))
+                    case "set_name":
+                        data = decode(data)
+                        if next((i for i, x in enumerate(self.authenticated_guests) if x.username == data), None):
+                            self.__log_to_guest(guest, "usename taken")
+                        else:
+                            self.__log_to_all(f"{guest.username} changed name to {data}")
+                            guest.username = data
+                            self.authenticated_guests[self.authenticated_guests.index(guest)] = guest
+                            
+                
+                
             except ConnectionResetError:
                 self.__on_guest_disconnect(guest)
                 return
@@ -130,6 +142,11 @@ class Room:
             guest.c.send(text.encode())
 
         self.message_callback(text)
+    
+
+    def __log_to_guest(self, guest, text: str):
+        text = f"log:{encode(text)}"
+        guest.c.send(text.encode())
     
     def send_server_message(self, text: str):
         # also check for commands

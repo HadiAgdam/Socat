@@ -1,68 +1,16 @@
-typed new message in client: 1
-typed new message in client: 2
-typed new message in client: 3
-typed new message in client: 4
-typed new message in client: 1
-typed new message in client: 2
-typed new message in client: 3
-typed new message in client: 5
-typed new message in client: k
+typed new message in client: ok
 recv
-received in server data: k
-typed new message in client: k
+typed new message in client: nothing
 recv
-received in server data: k
-typed new message in client: k
+typed new message in client: /set_name Javad
 recv
-received in server data: k
-typed new message in client: k
+typed new message in client: javad ?
 recv
-received in server data: k
-typed new message in client: k
+typed new message in client: /set_name javad
 recv
-received in server data: k
-typed new message in client: k
+typed new message in client: ok
 recv
-received in server data: k
-typed new message in client: k
+typed new message in client: /set_name hola
 recv
-received in server data: k
-typed new message in client: k
+typed new message in client: ok
 recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
-typed new message in client: k
-recv
-received in server data: k
