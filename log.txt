@@ -14,3 +14,4 @@ typed new message in client: /set_name hola
 recv
 typed new message in client: ok
 recv
+recv
