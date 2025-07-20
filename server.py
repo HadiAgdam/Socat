@@ -44,8 +44,10 @@ class Room:
                 command = data.split(":")[0]
                 data = data[len(command) + 1:]
                 match(command):
+
                     case "public_message":
                         self.__send_message_to_all("guest", guest.username, guest.id, decode(data))
+
                     case "set_name":
                         data = decode(data)
                         if next((i for i, x in enumerate(self.authenticated_guests) if x.username == data), None):
@@ -54,6 +56,10 @@ class Room:
                             self.__log_to_all(f"{guest.username} changed name to {data}")
                             guest.username = data
                             self.authenticated_guests[self.authenticated_guests.index(guest)] = guest
+                    
+                    case "ping":
+                        guest.c.send("pong".encode())
+                    
                             
                 
                 
@@ -93,11 +99,12 @@ class Room:
                             break
                     guest.username = username
 
-                    self.authenticated_guests.append(guest)
-                    self.not_authenticated_guests.remove((c, addr))
-                    Thread(target=self.__listen_for_authenticated_quest, args=[guest]).start()
                     guest.c.send("Auth successful".encode())
+
+                    self.not_authenticated_guests.remove((c, addr))
                     self.__log_to_all(f"{guest.username} joined to the room.")
+                    self.authenticated_guests.append(guest)
+                    Thread(target=self.__listen_for_authenticated_quest, args=[guest]).start()
                     return
                     
 

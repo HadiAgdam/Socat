@@ -1,4 +1,4 @@
-from curses import newwin, KEY_BACKSPACE, wrapper, curs_set
+from curses import newwin, KEY_BACKSPACE, wrapper, curs_set, color_pair, start_color, init_pair, COLOR_BLACK, COLOR_WHITE
 from utils import encode, decode
 from datetime import datetime
 
@@ -12,6 +12,14 @@ class Display:
 
     def __init__(self, on_send_message):
         self.on_send_message = on_send_message
+    
+
+    def set_status(self, status: str, server_ip: str, ping: int):
+        self.status_win.erase()
+        self.status_win.bkgd(' ', color_pair(1))
+        display_text = f" {server_ip} | status: {status}   ping: {ping}"
+        self.status_win.addstr(0, 0, display_text, color_pair(1))
+        self.status_win.refresh()
 
     def new_incoming_message(self, text: str):
         command = text.split(":")[0]
@@ -46,13 +54,21 @@ class Display:
     
 
     def __main(self, stdscr):
+        start_color()
+        init_pair(1, COLOR_BLACK, COLOR_WHITE)
         curs_set(1)
         stdscr.clear()
 
-        height, width = stdscr.getmaxyx()
 
-        self.chat_win = newwin(height - 3, width, 0, 0)
-        self.input_win = newwin(3, width, height - 3, 0)
+        self.height, self.width = stdscr.getmaxyx()
+        status_height = 1
+        input_height = 3
+        chat_height = self.height - status_height - input_height
+
+        self.status_win = newwin(status_height, self.width, 0, 0)
+        self.chat_win = newwin(chat_height, self.width, status_height, 0)
+        self.input_win = newwin(input_height, self.width, self.height - input_height, 0)
+
         self.input_win.addstr("You: ")
         self.input_win.refresh()
 

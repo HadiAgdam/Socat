@@ -3,8 +3,19 @@ from encryption import hash_password
 from utils import log
 from threading import Thread
 from utils import encode, decode
+from time import sleep, time
 
 class Guest:
+
+    def report_status(self, status: str, ping: int = None):
+        # abstract function
+        pass
+
+    def __start_heartbit(self):
+        while True:
+            self.t = int(time())
+            self.socket.send(f"ping:{encode(str(self.t))}".encode())
+            sleep(5)
 
     def __listen_for_incoming_message(self):
         while True:
@@ -15,7 +26,11 @@ class Guest:
                 data = data.decode()
                 if data == "Auth successful":
                     self.authenticated = True
-                    # return   this was the fucking bug I was looking for since last night
+                    continue
+                if data == "pong":
+                    if self.t:
+                        self.report_status("connected", int(time() - self.t))
+                        self.t = None
                     continue
                 if self.message_callback:
                     self.message_callback(data)
@@ -27,6 +42,7 @@ class Guest:
         self.authenticated = False
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.message_callback = None
+        self.t = None
     
 
     def connect(self, room_ip, port):
@@ -34,6 +50,7 @@ class Guest:
         self.room_ip = room_ip
         self.port = port
         Thread(target=self.__listen_for_incoming_message).start()
+        Thread(target=self.__start_heartbit).start()
         self.connected = True
 
     def auth(self, password: str):
