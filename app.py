@@ -31,6 +31,7 @@ if __name__ == "__main__":
         
         d = Display(room.send_server_message)
         room.message_callback = d.new_incoming_message
+        room.status_callback = d.set_status
 
         d.run()
   
@@ -67,10 +68,8 @@ if __name__ == "__main__":
         d = Display(guest.send_message)
         guest.message_callback = d.new_incoming_message
 
-        def set_status(status: str, ping: int):
-            d.set_status(status, guest.room_ip, ping)
         
-        guest.report_status = set_status
+        guest.report_status = d.set_status
 
 
         d.run()

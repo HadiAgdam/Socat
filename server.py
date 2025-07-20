@@ -23,6 +23,9 @@ class Room:
     def message_callback(txt):  # default callback
         pass
 
+    def status_callback(self, txt):
+        pass
+
     def __get_guest_id(self, socket, addr):
         return str(addr[1])
 
@@ -113,9 +116,16 @@ class Room:
             c, addr = self.socket.accept()
             self.not_authenticated_guests.append((c ,addr))
             Thread(target=self.__listen_for_not_authenticated_quest, args=(c, addr)).start()
+    
+
+    def __report_status(self):
+        while True:
+            log("__report_status")
+            self.status_callback(f"ONLINE | guest count: {len(self.authenticated_guests)}  unauthenticated guest count: {len(self.not_authenticated_guests)}")
+            sleep(3)
 
     
-    def __init__(self, password):
+    def __init__(self, password: str,):
         self.guests = []
         self.password = password
         self.is_up = False
@@ -130,6 +140,7 @@ class Room:
         self.is_up = True
         self.thread = Thread(target=self.listen_for_connections)
         self.thread.start()
+        Thread(target=self.__report_status).start()
         return get_local_ip()
     
     def __send_message_to_all(self, role: str, username: str, id: str, text: str):

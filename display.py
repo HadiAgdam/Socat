@@ -14,11 +14,10 @@ class Display:
         self.on_send_message = on_send_message
     
 
-    def set_status(self, status: str, server_ip: str, ping: int):
+    def set_status(self, text: str):
         self.status_win.erase()
         self.status_win.bkgd(' ', color_pair(1))
-        display_text = f" {server_ip} | status: {status}   ping: {ping}"
-        self.status_win.addstr(0, 0, display_text, color_pair(1))
+        self.status_win.addstr(0, 0, text, color_pair(1))
         self.status_win.refresh()
 
     def new_incoming_message(self, text: str):
@@ -74,6 +73,7 @@ class Display:
 
         typed = ""
         
+        self.set_status("")
 
         while True:
             ch = self.input_win.getch()

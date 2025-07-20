@@ -7,7 +7,7 @@ from time import sleep, time
 
 class Guest:
 
-    def report_status(self, status: str, ping: int = None):
+    def report_status(self, text: str):
         # abstract function
         pass
 
@@ -26,10 +26,12 @@ class Guest:
                 data = data.decode()
                 if data == "Auth successful":
                     self.authenticated = True
+                    Thread(target=self.__start_heartbit).start()
+
                     continue
                 if data == "pong":
                     if self.t:
-                        self.report_status("connected", int(time() - self.t))
+                        self.report_status(f" {self.room_ip} | status: CONNECTED  ping: {int(time() - self.t)}ms")
                         self.t = None
                     continue
                 if self.message_callback:
@@ -50,7 +52,6 @@ class Guest:
         self.room_ip = room_ip
         self.port = port
         Thread(target=self.__listen_for_incoming_message).start()
-        Thread(target=self.__start_heartbit).start()
         self.connected = True
 
     def auth(self, password: str):

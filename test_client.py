@@ -22,10 +22,9 @@ def typed_new_message(text):
 
 d = Display(typed_new_message)
 g.message_callback = d.new_incoming_message
-def set_status(status: str, ping: int):
-    d.set_status(status, g.room_ip, ping)
+
         
-g.report_status = set_status
-print('here')
+g.report_status = d.set_status
+
 
 d.run()
